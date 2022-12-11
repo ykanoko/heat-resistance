@@ -2,3 +2,4 @@ TIME_END = 40 * 60  #[s]
 LENGTH = 50 / 1000  #[m]
 N_CELL = 50
 D_X = LENGTH / N_CELL
+T_WD_0 = 20

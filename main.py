@@ -2,18 +2,18 @@ from math import log10
 import numpy as np
 import matplotlib.pyplot as plt
 from functions import get_T_fu
+from config import N_CELL, T_WD_0
 
 t = 0  # time秒
 T_fu = get_T_fu(t)  # 炉内温度℃
 
+#木材の初期化
+T_wd = np.array([T_WD_0] * N_CELL)
+print(T_wd[0])
 
-def T_fu(t):
-    return 345 * np.log10(8 * t / 60 + 1) + 20
-
-
-x = np.arange(0.0, 120.0 * 60, 1.0)
-plt.plot(x, T_fu(x), 'b:')
-plt.show()
+#x = np.arange(0.0, 120.0 * 60, 1.0)
+# plt.plot(x, T_fu(x), 'b:')
+# plt.show()
 
 
 def T_wd2(t):
