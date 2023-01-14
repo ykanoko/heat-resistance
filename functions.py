@@ -56,7 +56,7 @@ def get_lambda_wd_0(T_wd, T1_wd=20, rho_wd_0=RHO_WD_0):
     """
     lambda20 = 1.163 * (0.022 + 0.724 * (rho_wd_0 / 1000) + 0.0931 * ((rho_wd_0 / 1000)**2))
     return lambda20 * (1 - (1.1 - 0.00098 * rho_wd_0) * (T1_wd - T_wd) / 100)
-    #考察:式4-09を使ってるけど、繊維方向の可能性もある？#引用:木材の物理（緑）p67
+    #考察:値がでかすぎる。式4-09を使ってるけど、繊維方向の可能性もある？#引用:木材の物理（緑）p67
 
 
 def get_rho_c_wd(T_wd):
@@ -85,8 +85,8 @@ def get_rho_c_wd_0(T_wd):
     return lambda_wd / ALPHA_WD
 
 
-# print(get_T_fu(1))
-# print(get_lambda_wd(200))
+# print(get_h_air_wd(20))
+# print(get_lambda_wd(20))
 # print(get_lambda_wd_0(200))
 # print(0.0029 * 150 + 0.01954)
 # print(0.00275 * 21 + 0.09319)

@@ -15,13 +15,13 @@ for n in range(N_TIME + 1):
     # y_axis.append(T_fu)
     if n == 0:
         print('start')
+        # y_axis.append(0.09)
         #木材温度の初期化
         T_wd = np.array([[T_0_WD] * (N_CELL + 1)] * (N_TIME + 1))
         #T_wd[t:経過時間(0秒~)][x:場所0m~]
     else:
         for x in range(N_CELL + 1):
-
-            h_air = get_h_air_wd(T_wd[n - 1][x])
+            h_air = get_h_air_wd(T_wd[n - 1][0])
             if T_wd[n - 1][x] <= 100:
                 lambda_wd = get_lambda_wd(T_wd[n - 1][x])
                 rho_c_wd = get_rho_c_wd(T_wd[n - 1][x])
@@ -30,6 +30,7 @@ for n in range(N_TIME + 1):
                 rho_c_wd = get_rho_c_wd_0(T_wd[n - 1][x])
 
             if x == 0:
+                # y_axis.append(h_air)
                 T_wd[n][0] = T_wd[n - 1][0] + (ALPHA_WD * D_t / (D_X**2)) * (T_wd[n - 1][1] - T_wd[
                     n - 1][0]) + (D_t * h_air / (D_X * rho_c_wd)) * (T_fu - T_wd[n - 1][0]) + (
                         D_t * q_FU) / (D_X * rho_c_wd) + (D_t * q_GEN) / rho_c_wd
@@ -43,8 +44,13 @@ for n in range(N_TIME + 1):
                     T_wd[n - 1][N_CELL - 1] - T_wd[n - 1][N_CELL]
                 ) - (D_t * h_air /
                      (D_X * rho_c_wd)) * (T_wd[n - 1][N_CELL] - T_0_WD) + (D_t * q_GEN) / rho_c_wd
+                #DO:試験体の厚さを十分厚くすれば、非加熱面の状態を考慮しなくていい
                 #TODO:内部発熱(最後の項）を考慮する（炭化について）DO:難燃処理層最後尾の次をどう考えるか（荷重支持部表面？長田さんは炉内温度？一面加熱だから、布施さんの外温と同じ？）
+
+            # if x == 10:
+            #     y_axis.append(lambda_wd)
     # y_axis.append(T_wd[n][10])
+    # y_axis.append(T_wd[n][0])
     # print(t, T_fu, T_wd[n])
     #print(T_wd)
 y_axis = T_wd[N_TIME]
