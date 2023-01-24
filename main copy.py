@@ -6,15 +6,15 @@ from config import N_CELL, T_0_WD, T_AIR, ALPHA_WD, D_t, D_X, q_FU, q_GEN, N_TIM
 
 fig_number = 6
 #フォルダ
-folder_name = '100℃一定'
-# folder_name = '標準加熱曲線'
+# folder_name = '100℃一定'
+folder_name = '標準加熱曲線'
 #グラフタイトル
 # fig_title = '標準加熱曲線'
-fig_title = '温度推移'
+# fig_title = '温度推移'
 # fig_title = '温度分布'
 #比較
-# comparison = '密度'
-# fig_title = '加熱面の温度推移'
+comparison = '密度'
+fig_title = '加熱面の温度推移'
 # fig_title = '加熱終了時の温度分布'
 
 if fig_title == '温度推移' or fig_title == '加熱面の温度推移':
@@ -113,7 +113,7 @@ for n in range(N_TIME + 1):
     if folder_name == '標準加熱曲線':
         if fig_title == '温度推移':
             y_axis_2.append(T_wd[n][0])
-            y_axis_3.append(T_wd[n][5])
+            # y_axis_3.append(T_wd[n][5])
 
     if fig_title == '温度推移(x=0)':
         y_axis.append(T_wd[n][0])
