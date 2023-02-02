@@ -2,16 +2,23 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from functions import get_T_fu, get_h_air_wd, get_lambda_wd, get_rho_c_wd, get_lambda_wd_0, get_rho_c_wd_0
-from config import N_CELL, T_0_WD, T_AIR, ALPHA_WD, D_t, D_X, q_FU, q_GEN, N_TIME, LENGTH, RHO_WD_0
+from config import N_CELL, T_0_WD, T_AIR, ALPHA_WD, D_t, D_X, q_FU, q_GEN, N_TIME, LENGTH, RHO_WD_0, TIME_END
 
 fig_number = 6
 #フォルダ
-folder_name = '100℃一定'
-# folder_name = '標準加熱曲線'
+# folder_name = '100℃一定片面'
+# folder_name = '100℃一定両面'
+folder_name = '標準加熱曲線'
+if folder_name == '100℃一定両面':
+    T_AIR = 100  #[℃]
+if folder_name == '標準加熱曲線':
+    TIME_END = 50  #[s]
+    N_TIME = int(TIME_END / D_t)  #[個]　秒の区切りの個数、0秒を入れる場合は+1する
+
 #グラフタイトル
 # fig_title = '標準加熱曲線'
-fig_title = '温度推移'
-# fig_title = '温度分布'
+# fig_title = '温度推移'
+fig_title = '温度分布'
 #比較
 # comparison = '密度'
 # fig_title = '加熱面の温度推移'
@@ -51,7 +58,7 @@ y_axis = []
 ###温度算出
 for n in range(N_TIME + 1):
     t = n * D_t  #現実の経過時間
-    if folder_name == '100℃一定':
+    if folder_name == '100℃一定片面' or folder_name == '100℃一定両面':
         T_fu = 100
     if folder_name == '標準加熱曲線':
         T_fu = get_T_fu(t)
@@ -105,10 +112,10 @@ for n in range(N_TIME + 1):
             #     if x == 10:
             #         y_axis.append(lambda_wd)
 
-    if folder_name == '100℃一定':
+    if folder_name == '100℃一定片面' or folder_name == '100℃一定両面':
         if fig_title == '温度推移':
             y_axis_2.append(T_wd[n][0])
-            y_axis_3.append(T_wd[n][25])
+            y_axis_3.append(T_wd[n][int(N_CELL / 2)])
             y_axis_4.append(T_wd[n][N_CELL])
     if folder_name == '標準加熱曲線':
         if fig_title == '温度推移':
@@ -122,15 +129,15 @@ for n in range(N_TIME + 1):
     # print(t, T_fu, T_wd[n])
     #print(T_wd)
 # print(T_wd)
-if folder_name == '100℃一定':
+if folder_name == '100℃一定片面' or folder_name == '100℃一定両面':
     if fig_title == '温度分布':
         y_axis_1 = T_wd[0]
-        y_axis_2 = T_wd[27000]  #5400*10/2=27000
+        y_axis_2 = T_wd[int(N_TIME / 2)]
         y_axis_3 = T_wd[N_TIME]
 if folder_name == '標準加熱曲線':
     if fig_title == '温度分布':
         y_axis_1 = T_wd[0]
-        y_axis_2 = T_wd[250]
+        y_axis_2 = T_wd[int(N_TIME / 2)]
         y_axis_3 = T_wd[N_TIME]
 
 if fig_title == '温度分布(t=50)':
@@ -144,6 +151,8 @@ plt.rcParams['font.size'] = 16  #フォントの大きさ
 #目盛線
 plt.rcParams['xtick.direction'] = 'in'  #x軸の目盛線が内向き('in')か外向き('out')か双方向か('inout')
 plt.rcParams['ytick.direction'] = 'in'  #y軸の目盛線が内向き('in')か外向き('out')か双方向か('inout')
+plt.minorticks_on()
+# plt.rcParams['axes.autolimit_mode'] = 'round_numbers'
 #枠線
 plt.gca().spines['top'].set_visible(False)  #上の枠線を削除
 plt.gca().spines['right'].set_visible(False)  #右の枠線を削除
@@ -153,53 +162,56 @@ plt.subplots_adjust(bottom=0.22)  #図の位置(上下)を変更
 plt.xlabel(x_name)  #x軸ラベル
 plt.ylabel(y_name)  #y軸ラベル
 #タイトル
-plt.title('図' + str(fig_number) + '　' + fig_title, y=-0.30)
+# plt.title('図' + str(fig_number) + '　' + fig_title, y=-0.30)
+plt.title(fig_title, y=-0.30)  #図番号表記なし（発表スライド用）
 
-if folder_name == '100℃一定':
+if folder_name == '100℃一定片面' or folder_name == '100℃一定両面':
     if fig_title == '温度推移':
         #軸範囲
-        plt.xlim(0, 5400)  #x軸範囲
+        plt.xlim(0, TIME_END)  #x軸範囲
         plt.ylim(20, 100)  #y軸範囲
         #プロット
         plt.plot(x_axis, y_axis_1, "-.r", label='炉内')  #(x, y, fmt), fmt = '[marker][line][color]'
-        plt.plot(x_axis, y_axis_2, "-c", label='左端（$ \mathit{x} $=0.000）')
-        plt.plot(x_axis, y_axis_3, "--g", label='中央（$ \mathit{x} $=0.025）')
-        plt.plot(x_axis, y_axis_4, ":k", label='右端（$ \mathit{x} $=0.050）')
-        plt.legend(frameon=False)  #凡例（フレーム非表示）
+        plt.plot(x_axis, y_axis_2, "-c", label='左端')
+        plt.plot(x_axis, y_axis_3, "--g", label='中央')
+        plt.plot(x_axis, y_axis_4, ":k", label='右端')
+        plt.legend(loc='lower center', bbox_to_anchor=(0.5, 1), ncol=4)  #凡例
+
     if fig_title == '温度分布':
         #軸範囲
-        plt.xlim(0.00, 0.05)  #x軸範囲
+        plt.xlim(0.00, LENGTH)  #x軸範囲
         plt.ylim(15, 100)  #y軸範囲
         #プロット
-        plt.plot(x_axis, y_axis_1, "-r", label='0.0 h')  #(x, y, fmt), fmt = '[marker][line][color]'
-        plt.plot(x_axis, y_axis_2, "--b", label='1.0 h')
-        plt.plot(x_axis, y_axis_3, ":g", label='1.5 h')
-        plt.legend(frameon=False)  #凡例（フレーム非表示）
+        plt.plot(x_axis, y_axis_1, "-r", label='0 s')  #(x, y, fmt), fmt = '[marker][line][color]'
+        plt.plot(x_axis, y_axis_2, "--b", label=str(int(TIME_END / 2)) + ' s')
+        plt.plot(x_axis, y_axis_3, ":g", label=str(TIME_END) + ' s')
+        plt.legend(loc='lower center', bbox_to_anchor=(0.5, 1), ncol=3)  #凡例
 
 if folder_name == '標準加熱曲線':
     if fig_title == '標準加熱曲線':
         #軸範囲
-        plt.xlim(0, 50)  #x軸範囲
+        plt.xlim(0, TIME_END)  #x軸範囲
         plt.ylim(0, 350)  #y軸範囲
         plt.plot(x_axis, y_axis, '-', color="black")  #プロット
     if fig_title == '温度推移':
         #軸範囲
-        plt.xlim(0, 50)  #x軸範囲
+        plt.xlim(0, TIME_END)  #x軸範囲
         plt.ylim(20, 100)  #y軸範囲
         #プロット
         # plt.plot(x_axis, y_axis_1, "-r")  #(x, y, fmt), fmt = '[marker][line][color]'
         plt.plot(x_axis, y_axis_2, "-b", label='加熱面')
-        plt.plot(x_axis, y_axis_3, "--g", label='加熱面から5mm')
-        plt.legend(frameon=False)  #凡例（フレーム非表示）
+        plt.plot(x_axis, y_axis_3, "--g", label='加熱面から 5 mm')
+        plt.legend(loc='lower center', bbox_to_anchor=(0.5, 1), ncol=2)  #凡例
+
     if fig_title == '温度分布':
         #軸範囲
-        plt.xlim(0.00, 0.05)  #x軸範囲
+        plt.xlim(0.00, LENGTH)  #x軸範囲
         plt.ylim(15, 100)  #y軸範囲
         #プロット
         plt.plot(x_axis, y_axis_1, "-r", label='0 s')  #(x, y, fmt), fmt = '[marker][line][color]'
-        plt.plot(x_axis, y_axis_2, "--b", label='25 s')
-        plt.plot(x_axis, y_axis_3, ":g", label='50 s')
-        plt.legend(frameon=False)  #凡例（フレーム非表示）
+        plt.plot(x_axis, y_axis_2, "--b", label=str(int(TIME_END / 2)) + ' s')
+        plt.plot(x_axis, y_axis_3, ":g", label=str(TIME_END) + ' s')
+        plt.legend(loc='lower center', bbox_to_anchor=(0.5, 1), ncol=3)  #凡例
 
 #タイトル
 if fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)' or fig_title == '温度分布(t=50)':
@@ -213,9 +225,9 @@ if fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)' or f
 # plt.rcParams['ytick.major.width'] = 1.0#y軸主目盛り線の線幅
 # plt.rcParams['axes.linewidth'] = 1.0# 軸の線幅edge linewidth。囲みの太さ
 
-folder = "ver2/3_グラフ合体/" + folder_name + "/"
-# file_path = "images/" + folder + folder_name + fig_title
-file_path = "images/" + folder + folder_name + '_' + fig_title
+folder = "ver2/4_発表本番/" + folder_name + "/"
+file_path = "images/" + folder + folder_name + fig_title
+# file_path = "images/" + folder + folder_name + '_' + fig_title
 if fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)' or fig_title == '温度分布(t=50)':
     if RHO_WD_0 != 350.0:
         file_path = "images/" + folder + fig_title + '密度' + str(RHO_WD_0)

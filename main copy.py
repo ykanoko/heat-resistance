@@ -1,10 +1,10 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from functions import get_T_fu, get_h_air_wd, get_lambda_wd, get_rho_c_wd, get_lambda_wd_0, get_rho_c_wd_0
+from functions_copy import get_T_fu, get_h_air_wd, get_lambda_wd, get_rho_c_wd, get_lambda_wd_0, get_rho_c_wd_0
 from config import N_CELL, T_0_WD, T_AIR, ALPHA_WD, D_t, D_X, q_FU, q_GEN, N_TIME, LENGTH, RHO_WD_0
 
-fig_number = 6
+fig_number = 8
 #フォルダ
 # folder_name = '100℃一定'
 folder_name = '標準加熱曲線'
@@ -14,10 +14,11 @@ folder_name = '標準加熱曲線'
 # fig_title = '温度分布'
 #比較
 comparison = '密度'
-fig_title = '加熱面の温度推移'
-# fig_title = '加熱終了時の温度分布'
+# fig_title = '加熱面の温度推移'
+# fig_title = '加熱面から 5 mmの温度推移'
+fig_title = '加熱終了時の温度分布'
 
-if fig_title == '温度推移' or fig_title == '加熱面の温度推移':
+if fig_title == '温度推移' or fig_title == '加熱面の温度推移' or fig_title == '加熱面から 5 mmの温度推移':
     x_name = '時間 (s)'
     y_name = '温度 (℃)'
     x_axis = []
@@ -30,25 +31,8 @@ y_axis_2 = []
 y_axis_3 = []
 y_axis_4 = []
 
-#個々のグラフ作成
-# fig_title = '温度推移(x=0)'
-# fig_title = '温度推移(x=0.005)'
-# fig_title = '温度分布(t=50)'
-# fig_title == '熱伝達率の推移'
-if fig_title == '標準加熱曲線' or fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)':
-    x_name = '時間 (s)'
-    y_name = '温度 (℃)'
-    x_axis = []
-if fig_title == '温度分布(t=50)':
-    x_name = '位置x (m)'
-    y_name = '温度 (℃)'
-    x_axis = np.arange(0.0, LENGTH + D_X, D_X)
-if fig_title == '熱伝達率の推移':
-    x_name = '時間 (s)'
-    y_name = '熱伝達率 (W・m⁻²・K⁻¹)'
-y_axis = []
-
-###温度算出
+###温度算出1
+RHO_WD_0 = 250
 for n in range(N_TIME + 1):
     t = n * D_t  #現実の経過時間
     if folder_name == '100℃一定':
@@ -56,20 +40,11 @@ for n in range(N_TIME + 1):
     if folder_name == '標準加熱曲線':
         T_fu = get_T_fu(t)
 
-    if fig_title == '温度推移':
+    if fig_title == '温度推移' or fig_title == '加熱面の温度推移' or fig_title == '加熱面から 5 mmの温度推移':
         x_axis.append(t)
-        y_axis_1.append(T_fu)
-
-    if fig_title == '標準加熱曲線' or fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)':
-        x_axis.append(t)
-    if fig_title == '標準加熱曲線':
-        y_axis.append(T_fu)
 
     if n == 0:
         print('start')
-        #y_axis.append(8.0)
-        # y_axis.append(0.09)
-
         #木材温度の初期化
         T_wd = np.array([[T_0_WD] * (N_CELL + 1)] * (N_TIME + 1))
         #T_wd[t:経過時間(0秒~)][x:場所0m~]
@@ -77,64 +52,158 @@ for n in range(N_TIME + 1):
         for x in range(N_CELL + 1):
             h_air = get_h_air_wd(T_wd[n - 1][0])
             if T_wd[n - 1][x] <= 100:
-                lambda_wd = get_lambda_wd(T_wd[n][x])
-                rho_c_wd = get_rho_c_wd(T_wd[n - 1][x])
+                lambda_wd = get_lambda_wd(RHO_WD_0, T_wd[n][x])
+                rho_c_wd = get_rho_c_wd(RHO_WD_0, T_wd[n - 1][x])
             else:
-                lambda_wd = get_lambda_wd_0(T_wd[n][x])
-                rho_c_wd = get_rho_c_wd_0(T_wd[n - 1][x])
+                lambda_wd = get_lambda_wd_0(RHO_WD_0, T_wd[n][x])
+                rho_c_wd = get_rho_c_wd_0(RHO_WD_0, T_wd[n - 1][x])
 
             if x == 0:
                 #y_axis.append(h_air)
                 T_wd[n][0] = T_wd[n - 1][0] + (ALPHA_WD * D_t / (D_X**2)) * (T_wd[n - 1][1] - T_wd[
                     n - 1][0]) + (D_t * h_air / (D_X * rho_c_wd)) * (T_fu - T_wd[n - 1][0]) + (
                         D_t * q_FU) / (D_X * rho_c_wd) + (D_t * q_GEN) / rho_c_wd
-                #DO:差分法の実例がある本探す　#iPadで算出した左はじの式 TODO:内部発熱(最後の項）を考慮する（炭化について）TODO:輻射（最後から2番目の項）の考え方、おそらく違うので再考
             elif 0 < x < N_CELL:
                 T_wd[n][x] = T_wd[n - 1][x] + (ALPHA_WD * D_t / (D_X**2)) * (T_wd[n - 1][
                     x - 1] + T_wd[n - 1][x + 1] - 2 * T_wd[n - 1][x]) + (D_t * q_GEN) / rho_c_wd
-                #TODO:内部発熱(最後の項）を考慮する（炭化について）
             elif x == N_CELL:
                 T_wd[n][N_CELL] = T_wd[n - 1][N_CELL] + (ALPHA_WD * D_t / (D_X**2)) * (
                     T_wd[n - 1][N_CELL - 1] - T_wd[n - 1][N_CELL]) - (
                         D_t * h_air /
                         (D_X * rho_c_wd)) * (T_wd[n - 1][N_CELL] - T_AIR) + (D_t * q_GEN) / rho_c_wd
-                #DO:試験体の厚さを十分厚くすれば、非加熱面の状態を考慮しなくていい
-                #TODO:内部発熱(最後の項）を考慮する（炭化について）DO:難燃処理層最後尾の次をどう考えるか（荷重支持部表面？長田さんは炉内温度？一面加熱だから、布施さんの外温と同じ？）
-
-            # if fig_title == '':
-            #     if x == 10:
-            #         y_axis.append(lambda_wd)
 
     if folder_name == '100℃一定':
-        if fig_title == '温度推移':
-            y_axis_2.append(T_wd[n][0])
-            y_axis_3.append(T_wd[n][25])
-            y_axis_4.append(T_wd[n][N_CELL])
+        if fig_title == '温度推移' or fig_title == '加熱面の温度推移':
+            y_axis_1.append(T_wd[n][0])
+        if fig_title == '加熱面から 5 mmの温度推移':
+            y_axis_1.append(T_wd[n][5])
     if folder_name == '標準加熱曲線':
-        if fig_title == '温度推移':
-            y_axis_2.append(T_wd[n][0])
-            # y_axis_3.append(T_wd[n][5])
+        if fig_title == '温度推移' or fig_title == '加熱面の温度推移':
+            y_axis_1.append(T_wd[n][0])
+        if fig_title == '加熱面から 5 mmの温度推移':
+            y_axis_1.append(T_wd[n][5])
 
-    if fig_title == '温度推移(x=0)':
-        y_axis.append(T_wd[n][0])
-    if fig_title == '温度推移(x=0.005)':
-        y_axis.append(T_wd[n][5])
-    # print(t, T_fu, T_wd[n])
-    #print(T_wd)
-# print(T_wd)
 if folder_name == '100℃一定':
-    if fig_title == '温度分布':
-        y_axis_1 = T_wd[0]
-        y_axis_2 = T_wd[27000]  #5400*10/2=27000
+    if fig_title == '温度分布' or fig_title == '加熱終了時の温度分布':
+        y_axis_1 = T_wd[N_TIME]
+if folder_name == '標準加熱曲線':
+    if fig_title == '温度分布' or fig_title == '加熱終了時の温度分布':
+        y_axis_1 = T_wd[N_TIME]
+###温度算出1
+
+###温度算出2
+RHO_WD_0 = 350
+for n in range(N_TIME + 1):
+    t = n * D_t  #現実の経過時間
+    if folder_name == '100℃一定':
+        T_fu = 100
+    if folder_name == '標準加熱曲線':
+        T_fu = get_T_fu(t)
+
+    if n == 0:
+        print('start')
+        #木材温度の初期化
+        T_wd = np.array([[T_0_WD] * (N_CELL + 1)] * (N_TIME + 1))
+        #T_wd[t:経過時間(0秒~)][x:場所0m~]
+    else:
+        for x in range(N_CELL + 1):
+            h_air = get_h_air_wd(T_wd[n - 1][0])
+            if T_wd[n - 1][x] <= 100:
+                lambda_wd = get_lambda_wd(RHO_WD_0, T_wd[n][x])
+                rho_c_wd = get_rho_c_wd(RHO_WD_0, T_wd[n - 1][x])
+            else:
+                lambda_wd = get_lambda_wd_0(RHO_WD_0, T_wd[n][x])
+                rho_c_wd = get_rho_c_wd_0(RHO_WD_0, T_wd[n - 1][x])
+
+            if x == 0:
+                #y_axis.append(h_air)
+                T_wd[n][0] = T_wd[n - 1][0] + (ALPHA_WD * D_t / (D_X**2)) * (T_wd[n - 1][1] - T_wd[
+                    n - 1][0]) + (D_t * h_air / (D_X * rho_c_wd)) * (T_fu - T_wd[n - 1][0]) + (
+                        D_t * q_FU) / (D_X * rho_c_wd) + (D_t * q_GEN) / rho_c_wd
+            elif 0 < x < N_CELL:
+                T_wd[n][x] = T_wd[n - 1][x] + (ALPHA_WD * D_t / (D_X**2)) * (T_wd[n - 1][
+                    x - 1] + T_wd[n - 1][x + 1] - 2 * T_wd[n - 1][x]) + (D_t * q_GEN) / rho_c_wd
+            elif x == N_CELL:
+                T_wd[n][N_CELL] = T_wd[n - 1][N_CELL] + (ALPHA_WD * D_t / (D_X**2)) * (
+                    T_wd[n - 1][N_CELL - 1] - T_wd[n - 1][N_CELL]) - (
+                        D_t * h_air /
+                        (D_X * rho_c_wd)) * (T_wd[n - 1][N_CELL] - T_AIR) + (D_t * q_GEN) / rho_c_wd
+
+    if folder_name == '100℃一定':
+        if fig_title == '温度推移' or fig_title == '加熱面の温度推移':
+            y_axis_2.append(T_wd[n][0])
+        if fig_title == '加熱面から 5 mmの温度推移':
+            y_axis_2.append(T_wd[n][5])
+    if folder_name == '標準加熱曲線':
+        if fig_title == '温度推移' or fig_title == '加熱面の温度推移':
+            y_axis_2.append(T_wd[n][0])
+        if fig_title == '加熱面から 5 mmの温度推移':
+            y_axis_2.append(T_wd[n][5])
+
+if folder_name == '100℃一定':
+    if fig_title == '温度分布' or fig_title == '加熱終了時の温度分布':
+        y_axis_2 = T_wd[N_TIME]
+if folder_name == '標準加熱曲線':
+    if fig_title == '温度分布' or fig_title == '加熱終了時の温度分布':
+        y_axis_2 = T_wd[N_TIME]
+###温度算出2
+
+###温度算出3
+RHO_WD_0 = 450
+for n in range(N_TIME + 1):
+    t = n * D_t  #現実の経過時間
+    if folder_name == '100℃一定':
+        T_fu = 100
+    if folder_name == '標準加熱曲線':
+        T_fu = get_T_fu(t)
+
+    if n == 0:
+        print('start')
+        #木材温度の初期化
+        T_wd = np.array([[T_0_WD] * (N_CELL + 1)] * (N_TIME + 1))
+        #T_wd[t:経過時間(0秒~)][x:場所0m~]
+    else:
+        for x in range(N_CELL + 1):
+            h_air = get_h_air_wd(T_wd[n - 1][0])
+            if T_wd[n - 1][x] <= 100:
+                lambda_wd = get_lambda_wd(RHO_WD_0, T_wd[n][x])
+                rho_c_wd = get_rho_c_wd(RHO_WD_0, T_wd[n - 1][x])
+            else:
+                lambda_wd = get_lambda_wd_0(RHO_WD_0, T_wd[n][x])
+                rho_c_wd = get_rho_c_wd_0(RHO_WD_0, T_wd[n - 1][x])
+
+            if x == 0:
+                #y_axis.append(h_air)
+                T_wd[n][0] = T_wd[n - 1][0] + (ALPHA_WD * D_t / (D_X**2)) * (T_wd[n - 1][1] - T_wd[
+                    n - 1][0]) + (D_t * h_air / (D_X * rho_c_wd)) * (T_fu - T_wd[n - 1][0]) + (
+                        D_t * q_FU) / (D_X * rho_c_wd) + (D_t * q_GEN) / rho_c_wd
+            elif 0 < x < N_CELL:
+                T_wd[n][x] = T_wd[n - 1][x] + (ALPHA_WD * D_t / (D_X**2)) * (T_wd[n - 1][
+                    x - 1] + T_wd[n - 1][x + 1] - 2 * T_wd[n - 1][x]) + (D_t * q_GEN) / rho_c_wd
+            elif x == N_CELL:
+                T_wd[n][N_CELL] = T_wd[n - 1][N_CELL] + (ALPHA_WD * D_t / (D_X**2)) * (
+                    T_wd[n - 1][N_CELL - 1] - T_wd[n - 1][N_CELL]) - (
+                        D_t * h_air /
+                        (D_X * rho_c_wd)) * (T_wd[n - 1][N_CELL] - T_AIR) + (D_t * q_GEN) / rho_c_wd
+
+    if folder_name == '100℃一定':
+        if fig_title == '温度推移' or fig_title == '加熱面の温度推移':
+            y_axis_3.append(T_wd[n][0])
+        if fig_title == '加熱面から 5 mmの温度推移':
+            y_axis_3.append(T_wd[n][5])
+    if folder_name == '標準加熱曲線':
+        if fig_title == '温度推移' or fig_title == '加熱面の温度推移':
+            y_axis_3.append(T_wd[n][0])
+        if fig_title == '加熱面から 5 mmの温度推移':
+            y_axis_3.append(T_wd[n][5])
+
+if folder_name == '100℃一定':
+    if fig_title == '温度分布' or fig_title == '加熱終了時の温度分布':
         y_axis_3 = T_wd[N_TIME]
 if folder_name == '標準加熱曲線':
-    if fig_title == '温度分布':
-        y_axis_1 = T_wd[0]
-        y_axis_2 = T_wd[250]
+    if fig_title == '温度分布' or fig_title == '加熱終了時の温度分布':
         y_axis_3 = T_wd[N_TIME]
-
-if fig_title == '温度分布(t=50)':
-    y_axis = T_wd[N_TIME]
+###温度算出3
 
 ###グラフ設定
 ##図の形式
@@ -153,10 +222,11 @@ plt.subplots_adjust(bottom=0.22)  #図の位置(上下)を変更
 plt.xlabel(x_name)  #x軸ラベル
 plt.ylabel(y_name)  #y軸ラベル
 #タイトル
-plt.title('図' + str(fig_number) + '　' + fig_title, y=-0.30)
+# plt.title('図' + str(fig_number) + '　' + fig_title, y=-0.30)
+plt.title(fig_title, y=-0.30)  #図番号表記なし（発表スライド用）
 
 if folder_name == '100℃一定':
-    if fig_title == '温度推移':
+    if fig_title == '温度推移' or fig_title == '加熱面の温度推移' or fig_title == '加熱面から 5 mmの温度推移':
         #軸範囲
         plt.xlim(0, 5400)  #x軸範囲
         plt.ylim(20, 100)  #y軸範囲
@@ -166,7 +236,7 @@ if folder_name == '100℃一定':
         plt.plot(x_axis, y_axis_3, "--g", label='中央（$ \mathit{x} $=0.025）')
         plt.plot(x_axis, y_axis_4, ":k", label='右端（$ \mathit{x} $=0.050）')
         plt.legend(frameon=False)  #凡例（フレーム非表示）
-    if fig_title == '温度分布':
+    if fig_title == '温度分布' or fig_title == '加熱終了時の温度分布':
         #軸範囲
         plt.xlim(0.00, 0.05)  #x軸範囲
         plt.ylim(15, 100)  #y軸範囲
@@ -177,48 +247,44 @@ if folder_name == '100℃一定':
         plt.legend(frameon=False)  #凡例（フレーム非表示）
 
 if folder_name == '標準加熱曲線':
-    if fig_title == '標準加熱曲線':
-        #軸範囲
-        plt.xlim(0, 50)  #x軸範囲
-        plt.ylim(0, 350)  #y軸範囲
-        plt.plot(x_axis, y_axis, '-', color="black")  #プロット
-    if fig_title == '温度推移':
+    if fig_title == '温度推移' or fig_title == '加熱面の温度推移':
         #軸範囲
         plt.xlim(0, 50)  #x軸範囲
         plt.ylim(20, 100)  #y軸範囲
         #プロット
-        # plt.plot(x_axis, y_axis_1, "-r")  #(x, y, fmt), fmt = '[marker][line][color]'
-        plt.plot(x_axis, y_axis_2, "-b", label='加熱面')
-        plt.plot(x_axis, y_axis_3, "--g", label='加熱面から5mm')
+        plt.plot(x_axis, y_axis_1, "-r",
+                 label='全乾密度：250 kg/m³')  #(x, y, fmt), fmt = '[marker][line][color]'
+        plt.plot(x_axis, y_axis_2, "--b", label='全乾密度：350 kg/m³')
+        plt.plot(x_axis, y_axis_3, ":g", label='全乾密度：450 kg/m³')
         plt.legend(frameon=False)  #凡例（フレーム非表示）
-    if fig_title == '温度分布':
+    if fig_title == '加熱面から 5 mmの温度推移':
+        #軸範囲
+        plt.xlim(0, 50)  #x軸範囲
+        plt.ylim(20, 27)  #y軸範囲
+        #プロット
+        plt.plot(x_axis, y_axis_1, "-r",
+                 label='全乾密度：250 kg/m³')  #(x, y, fmt), fmt = '[marker][line][color]'
+        plt.plot(x_axis, y_axis_2, "--b", label='全乾密度：350 kg/m³')
+        plt.plot(x_axis, y_axis_3, ":g", label='全乾密度：450 kg/m³')
+        plt.legend(frameon=False)  #凡例（フレーム非表示）
+    if fig_title == '温度分布' or fig_title == '加熱終了時の温度分布':
         #軸範囲
         plt.xlim(0.00, 0.05)  #x軸範囲
         plt.ylim(15, 100)  #y軸範囲
         #プロット
-        plt.plot(x_axis, y_axis_1, "-r", label='0 s')  #(x, y, fmt), fmt = '[marker][line][color]'
-        plt.plot(x_axis, y_axis_2, "--b", label='25 s')
-        plt.plot(x_axis, y_axis_3, ":g", label='50 s')
+        plt.plot(x_axis, y_axis_1, "-r",
+                 label='全乾密度：250 kg/m³')  #(x, y, fmt), fmt = '[marker][line][color]'
+        plt.plot(x_axis, y_axis_2, "--b", label='全乾密度：350 kg/m³')
+        plt.plot(x_axis, y_axis_3, ":g", label='全乾密度：450 kg/m³')
         plt.legend(frameon=False)  #凡例（フレーム非表示）
-
-#タイトル
-if fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)' or fig_title == '温度分布(t=50)':
-    if RHO_WD_0 != 350.0:
-        plt.title('図' + str(fig_number) + '　' + fig_title + '(d₀=' + str(RHO_WD_0) + ')', y=-0.30)
-
-if fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)' or fig_title == '温度分布(t=50)':
-    plt.plot(x_axis, y_axis, '-', color="black")
 
 # plt.rcParams['xtick.major.width'] = 1.0#x軸主目盛り線の線幅
 # plt.rcParams['ytick.major.width'] = 1.0#y軸主目盛り線の線幅
 # plt.rcParams['axes.linewidth'] = 1.0# 軸の線幅edge linewidth。囲みの太さ
 
-folder = "ver2/3_グラフ合体/" + folder_name + "/"
+folder = "ver2/4_発表本番/" + folder_name + "/"
 # file_path = "images/" + folder + folder_name + fig_title
 file_path = "images/" + folder + folder_name + '_' + fig_title
-if fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)' or fig_title == '温度分布(t=50)':
-    if RHO_WD_0 != 350.0:
-        file_path = "images/" + folder + fig_title + '密度' + str(RHO_WD_0)
 os.makedirs("images/" + folder, exist_ok=True)
 plt.savefig(file_path.replace('.', '_'), bbox_inches="tight")
 plt.show()
