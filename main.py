@@ -6,9 +6,9 @@ from config import N_CELL, T_0_WD, T_AIR, ALPHA_WD, D_t, D_X, q_FU, q_GEN, N_TIM
 
 fig_number = 6
 #フォルダ
-# folder_name = '100℃一定片面'
+folder_name = '100℃一定片面'
 # folder_name = '100℃一定両面'
-folder_name = '標準加熱曲線'
+# folder_name = '標準加熱曲線'
 if folder_name == '100℃一定両面':
     T_AIR = 100  #[℃]
 if folder_name == '標準加熱曲線':
@@ -162,8 +162,9 @@ plt.subplots_adjust(bottom=0.22)  #図の位置(上下)を変更
 plt.xlabel(x_name)  #x軸ラベル
 plt.ylabel(y_name)  #y軸ラベル
 #タイトル
-# plt.title('図' + str(fig_number) + '　' + fig_title, y=-0.30)
-plt.title(fig_title, y=-0.30)  #図番号表記なし（発表スライド用）
+plt.title('図' + str(fig_number) + '　' + fig_title, y=-0.30)
+# plt.title(fig_title, y=-0.30)  #図番号表記なし（発表スライド用）
+# plt.title('図2 ' + '100℃一定, 片面加熱における' + fig_title, y=-0.30)
 
 if folder_name == '100℃一定片面' or folder_name == '100℃一定両面':
     if fig_title == '温度推移':
@@ -221,11 +222,7 @@ if fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)' or f
 if fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)' or fig_title == '温度分布(t=50)':
     plt.plot(x_axis, y_axis, '-', color="black")
 
-# plt.rcParams['xtick.major.width'] = 1.0#x軸主目盛り線の線幅
-# plt.rcParams['ytick.major.width'] = 1.0#y軸主目盛り線の線幅
-# plt.rcParams['axes.linewidth'] = 1.0# 軸の線幅edge linewidth。囲みの太さ
-
-folder = "ver2/4_発表本番/" + folder_name + "/"
+folder = "ver2/5_要旨/" + folder_name + "/"
 file_path = "images/" + folder + folder_name + fig_title
 # file_path = "images/" + folder + folder_name + '_' + fig_title
 if fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)' or fig_title == '温度分布(t=50)':
