@@ -152,7 +152,8 @@ if fig_title == '温度分布(t=50)':
 ##図の形式
 #文字
 plt.rcParams['font.family'] = 'MS Gothic'  #使用するフォント
-plt.rcParams['font.size'] = 16  #フォントの大きさ
+# plt.rcParams['font.size'] = 16  #フォントの大きさ
+plt.rcParams['font.size'] = 11  #フォントの大きさ（卒論本文）
 #目盛線
 plt.rcParams['xtick.direction'] = 'in'  #x軸の目盛線が内向き('in')か外向き('out')か双方向か('inout')
 plt.rcParams['ytick.direction'] = 'in'  #y軸の目盛線が内向き('in')か外向き('out')か双方向か('inout')
@@ -168,7 +169,7 @@ plt.xlabel(x_name)  #x軸ラベル
 plt.ylabel(y_name)  #y軸ラベル
 #タイトル
 # plt.title('図' + str(fig_number) + '　' + fig_title, y=-0.30)
-plt.title(fig_title, y=-0.30)  #図番号表記なし（発表スライド用）
+# plt.title(fig_title, y=-0.30)  #図番号表記なし（発表スライド用）
 # plt.title('図2 ' + '100℃一定, 片面加熱における' + fig_title, y=-0.30)
 
 if folder_name == '100℃一定片面' or folder_name == '100℃一定両面':
@@ -231,9 +232,9 @@ if fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)' or f
 if fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)' or fig_title == '温度分布(t=50)':
     plt.plot(x_axis, y_axis, '-', color="black")
 
-folder = "ver2/4_発表本番/" + folder_name + "/"
-# file_path = "images/" + folder + folder_name + fig_title
-file_path = "images/" + folder + folder_name + '_' + fig_title
+folder = "ver2/6_卒論本文/" + folder_name + "/"
+file_path = "images/" + folder + folder_name + fig_title
+# file_path = "images/" + folder + folder_name + '_' + fig_title
 if fig_title == '温度推移(x=0)' or fig_title == '温度推移(x=0.005)' or fig_title == '温度分布(t=50)':
     if RHO_WD_0 != 350.0:
         file_path = "images/" + folder + fig_title + '密度' + str(RHO_WD_0)
