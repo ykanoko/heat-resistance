@@ -6,9 +6,9 @@ from config import N_CELL, T_0_WD, T_AIR_1, T_AIR_2_100, ALPHA_WD, D_t, D_X, q_F
 
 fig_number = 6
 #フォルダ
-folder_name = '100℃一定片面'
+# folder_name = '100℃一定片面'
 # folder_name = '100℃一定両面'
-# folder_name = '標準加熱曲線'
+folder_name = '標準加熱曲線'
 if folder_name == '100℃一定片面':
     TIME_END = TIME_END_100
     T_AIR = T_AIR_1
@@ -23,8 +23,8 @@ if folder_name == '標準加熱曲線':
 N_TIME = int(TIME_END / D_t)  #[個]　秒の区切りの個数、0秒を入れる場合は+1する
 
 #グラフタイトル
-# fig_title = '標準加熱曲線'
-fig_title = '温度推移'
+fig_title = '標準加熱曲線'
+# fig_title = '温度推移'
 # fig_title = '温度分布'
 #比較
 # comparison = '密度'
@@ -97,20 +97,13 @@ for n in range(N_TIME + 1):
 
             if x == 0:
                 #y_axis.append(h_air)
-                T_wd[n][0] = T_wd[n - 1][0] + (ALPHA_WD * D_t / (D_X**2)) * (T_wd[n - 1][1] - T_wd[
-                    n - 1][0]) + (D_t * h_air / (D_X * rho_c_wd)) * (T_fu - T_wd[n - 1][0]) + (
-                        D_t * q_FU) / (D_X * rho_c_wd) + (D_t * q_GEN) / rho_c_wd
+                T_wd[n][0] = T_wd[n - 1][0] + (ALPHA_WD * D_t / (D_X**2)) * (T_wd[n - 1][1] - T_wd[n - 1][0]) + (D_t * h_air / (D_X * rho_c_wd)) * (T_fu - T_wd[n - 1][0]) + (D_t * q_FU) / (D_X * rho_c_wd) + (D_t * q_GEN) / rho_c_wd
                 #DO:差分法の実例がある本探す　#iPadで算出した左はじの式 TODO:内部発熱(最後の項）を考慮する（炭化について）TODO:輻射（最後から2番目の項）の考え方、おそらく違うので再考
             elif 0 < x < N_CELL:
-                T_wd[n][x] = T_wd[n - 1][x] + (ALPHA_WD * D_t / (D_X**2)) * (T_wd[n - 1][
-                    x - 1] + T_wd[n - 1][x + 1] - 2 * T_wd[n - 1][x]) + (D_t * q_GEN) / rho_c_wd
+                T_wd[n][x] = T_wd[n - 1][x] + (ALPHA_WD * D_t / (D_X**2)) * (T_wd[n - 1][x - 1] + T_wd[n - 1][x + 1] - 2 * T_wd[n - 1][x]) + (D_t * q_GEN) / rho_c_wd
                 #TODO:内部発熱(最後の項）を考慮する（炭化について）
             elif x == N_CELL:
-                T_wd[n][N_CELL] = T_wd[n - 1][N_CELL] + (ALPHA_WD * D_t / (D_X**2)) * (
-                    T_wd[n - 1][N_CELL - 1] - T_wd[n - 1][N_CELL]) - (
-                        D_t * h_air /
-                        (D_X * rho_c_wd)) * (T_wd[n - 1][N_CELL] - T_AIR) + (D_t * q_GEN) / rho_c_wd
-                #DO:試験体の厚さを十分厚くすれば、非加熱面の状態を考慮しなくていい
+                T_wd[n][N_CELL] = T_wd[n - 1][N_CELL] + (ALPHA_WD * D_t / (D_X**2)) * (T_wd[n - 1][N_CELL - 1] - T_wd[n - 1][N_CELL]) - (D_t * h_air / (D_X * rho_c_wd)) * (T_wd[n - 1][N_CELL] - T_AIR) + (D_t * q_GEN) / rho_c_wd
                 #TODO:内部発熱(最後の項）を考慮する（炭化について）DO:難燃処理層最後尾の次をどう考えるか（荷重支持部表面？長田さんは炉内温度？一面加熱だから、布施さんの外温と同じ？）
 
             # if fig_title == '':
@@ -182,11 +175,7 @@ if folder_name == '100℃一定片面' or folder_name == '100℃一定両面':
         plt.plot(x_axis, y_axis_2, "-c", label='$ \mathit{x} $=0.000')
         plt.plot(x_axis, y_axis_3, "--g", label='$ \mathit{x} $=0.025')
         plt.plot(x_axis, y_axis_4, ":k", label='$ \mathit{x} $=0.050')
-        plt.legend(loc='lower center',
-                   bbox_to_anchor=(0.5, 1),
-                   ncol=4,
-                   columnspacing=1,
-                   handletextpad=0.32)  #凡例
+        plt.legend(loc='lower center', bbox_to_anchor=(0.5, 1), ncol=4, columnspacing=1, handletextpad=0.32)  #凡例
 
     if fig_title == '温度分布':
         #軸範囲
@@ -203,6 +192,7 @@ if folder_name == '標準加熱曲線':
         #軸範囲
         plt.xlim(0, TIME_END)  #x軸範囲
         plt.ylim(0, 350)  #y軸範囲
+        # plt.ylim(0, 1200)  #y軸範囲
         plt.plot(x_axis, y_axis, '-', color="black")  #プロット
     if fig_title == '温度推移':
         #軸範囲

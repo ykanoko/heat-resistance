@@ -40,7 +40,7 @@ def get_lambda_wd(rho_wd_0, T_wd, T1_wd=20, lambda1=0.09):
         W/m*K:求めたい木材の熱伝導率 
     """
     return lambda1 * (1 - (1.1 - 0.00098 * rho_wd_0) * (T1_wd - T_wd) / 100)
-    #TODO:高温域まで対応してる式かどうか#考察:引用の式がおそらく違うため、改編版引用:木材の物理p63(4-12)
+    #考察:引用の式がおそらく違うため、改編版引用:木材の物理p63(4-12)
 
 
 def get_lambda_wd_0(rho_wd_0, T_wd, T1_wd=20):
